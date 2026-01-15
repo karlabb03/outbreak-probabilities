@@ -4,16 +4,18 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from pathlib import Path
+import json
+import numpy as np
+import joblib
+
+# Set Path
 BASE_DIR = Path(__file__).resolve().parents[3]
 model_dir = BASE_DIR / "src" / "outbreak_probabilities" / "machine_learning" / "Model_SIM"
 plot_dir = BASE_DIR / "src" / "outbreak_probabilities" / "machine_learning" / "Model_SIM"/ "plots2"
 plot_dir.mkdir(parents=True, exist_ok=True)
-import json
-import numpy as np
-import joblib
-# Load results and plot predicitions vs data size to assess when does the model converge to the analytical solution
-# FIRST use the model to predict on test samples (week_1, week_2, week_3) and then plot the results vs data size used for training
 
+
+# known analytical solutions for specific samples
 sample_solutions = {
     (1, 2, 0): 0.71617,
     (1, 1, 0): 0.53455,
@@ -22,8 +24,14 @@ sample_solutions = {
     (1,3,1): 0.94251,
     (1,0,1): 0.74969,
 }
+
+# evaluate models trained on different data sizes
 data_sizes = [500 * i for i in range(1, 40)]  # up to 20k samples
+
+# store results
 results = {sample: [] for sample in sample_solutions.keys()}
+
+# load models and make predictions
 for size in data_sizes:
     stem = f"ML_SIM_{size}_RF"
     model_path = model_dir / f"{stem}.pkl"
@@ -36,12 +44,13 @@ for size in data_sizes:
         sample_scaled = scaler.transform(sample_array)
         pred_prob = model.predict_proba(sample_scaled)[0][1]  # probability of class 1 (outbreak)
         results[sample].append(pred_prob)
+        
 # plot results
 for sample in sample_solutions.keys():
     plt.figure()
     plt.plot(data_sizes, results[sample], marker='o', label='ML Prediction')
+    # plot the analytic solution line
     plt.axhline(y=sample_solutions[sample], color='r', linestyle='--', label='Analytical Solution = ' + str(sample_solutions[sample]))
-    # include analutic solution number and have light gray grid
     plt.title(f"Predicted Outbreak Probability for Sample {sample}")
     plt.xlabel("Training Data Size")
     plt.ylabel("Predicted Outbreak Probability")

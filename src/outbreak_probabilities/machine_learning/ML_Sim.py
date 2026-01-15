@@ -8,6 +8,10 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 
+"""Train ML models to predict PMO based on first 3 weeks of data, 
+using increasing amounts of training data (from 500 to 19000)."""
+
+# Set Path
 BASE_DIR = Path(__file__).resolve().parents[3]
 data_path = BASE_DIR / "data" / "test_simulations.csv"
 model_dir = BASE_DIR / "src" / "outbreak_probabilities" / "machine_learning" / "Model_SIM"
