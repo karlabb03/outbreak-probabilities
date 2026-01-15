@@ -149,10 +149,10 @@ def plot_pmo_vs_r(pmo_r: np.ndarray, out_png: str, figsize: Tuple[int, int], obs
                    label=f"Analytic PMO (observed,R-range) = {analytic_pmo:.5f}")
 
     ax.set_xlabel("Sampled matched trajectory index r")
-    ax.set_ylabel("Cumulative PMO fraction (first r trajectories)")
+    ax.set_ylabel("Cumulative PMO fraction")
     obs_str = ", ".join(str(x) for x in observed) if observed else "[]"
     ax.set_title(
-        f"Cumulative PMO across matched outbreaks only \n{R} outbreaks with initial cases {obs_str}\nSampling: {sample_strategy} (size={sample_size})  |  sort_by: {sort_by}"
+        f"Cumulative PMO across matched outbreaks only \n{R}/ outbreaks with initial cases {obs_str}\nSampling: {sample_strategy}  |  sort_by: {sort_by}"
     )
     ax.set_xlim(1, max(1, R))
     ax.set_ylim(0, 1.0)
