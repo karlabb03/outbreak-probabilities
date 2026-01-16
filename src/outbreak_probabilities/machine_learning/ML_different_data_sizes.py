@@ -12,13 +12,17 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import GradientBoostingClassifier
 
+# Set Path
 BASE_DIR = Path(__file__).resolve().parents[3]
 data_path = BASE_DIR / "data" / "test_simulations.csv"
 model_dir = BASE_DIR / "src" / "outbreak_probabilities" / "machine_learning" / "Model_SIM"
 plot_dir = BASE_DIR / "src" / "outbreak_probabilities" / "machine_learning" / "Model_SIM"/ "plots"
 
+# Make directories 
 model_dir.mkdir(parents=True, exist_ok=True)
 plot_dir.mkdir(parents=True, exist_ok=True)
+
+# Load data
 data = pd.read_csv(data_path)
 
 # remove first two rows
@@ -26,10 +30,13 @@ data = data.iloc[2:].reset_index(drop=True)
 data.columns = data.iloc[0]
 data = data.iloc[1:].reset_index(drop=True)
 
+# only use the first 3 weeks to train the model
 data = data[["week_1", "week_2", "week_3", "PMO"]]
+
 X = data[["week_1", "week_2","week_3",]].astype(float)
 y = data["PMO"].astype(int)
 
+# define models
 models = {
     "RF": RandomForestClassifier(
         n_estimators=100,
@@ -41,10 +48,11 @@ models = {
     "GB": GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42),
 }
 
+# scale X data
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# train and dave
+# train and save
 feature_names = list(X.columns)  
 n_weeks = len(feature_names)
 
@@ -62,12 +70,14 @@ for size in data_sizes:
         scaler_path = model_dir / f"{stem}_scaler.pkl"
         meta_json_path = model_dir / f"{stem}.json"
         meta_jbl_path = model_dir / f"{stem}_meta.pkl"
+        # save models and scalers
         joblib.dump(model, model_path, compress=3)
         joblib.dump(scaler, scaler_path, compress=3)
         results[size][model_name] = {
             "model_path": str(model_path),
             "scaler_path": str(scaler_path),
         }
+        # save meta data for each model
         meta = {
             "model_name": model_name,
             "n_weeks": n_weeks,
@@ -75,11 +85,13 @@ for size in data_sizes:
             "data_size": size,
             "training_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
+        #  Save JSON and joblib copy 
         with open(meta_json_path, "w") as f:
             json.dump(meta, f, indent=4)
         joblib.dump(meta, meta_jbl_path, compress=3)
         
         print(f"Trained and saved model {model_name} with {size} samples.")
+
 # Save overall results
 results_path = model_dir / "training_results.json"
 with open(results_path, "w") as f:
@@ -87,7 +99,7 @@ with open(results_path, "w") as f:
 print("\nAll models trained and saved.")
 
 
-# Prediction helper
+# Prediction helper function
 def predict_pmo(model_name: str, week_1: float, week_2: float, week_3:float, threshold: float = 0.5):
     """
     Predict the probability of a major outbreak (PMO) given the model name and weekly case counts.
@@ -107,6 +119,7 @@ def predict_pmo(model_name: str, week_1: float, week_2: float, week_3:float, thr
     # predict probability
     proba = clf.predict_proba(X_scaled)[0][1]  # probability of class 1 (major outbreak)
 
+    # if probability exceeds the threshold, classify as a major outbreak
     pred = int(proba >= threshold)
     pred_label = "major" if pred == 1 else "minor"
     

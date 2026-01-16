@@ -1,5 +1,6 @@
 """Run this file to plot the predicted outbreak probabilities from ML models(GB and) trained on different data sizes. It can be used to assess when the ML models converges to the analytical solutions."""
 
+# import libraries
 import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
@@ -16,7 +17,7 @@ model_dir = BASE_DIR / "src" / "outbreak_probabilities" / "machine_learning" /"M
 plot_dir = BASE_DIR / "src" / "outbreak_probabilities" / "machine_learning" / "Model_SIM"/ "ML_CONVERGENCE_PLOTS"
 plot_dir.mkdir(parents=True, exist_ok=True)
 
-# analytical solutions for selected samples
+# Test samples and their analytical solutions
 sample_solutions = {
     (1, 2, 0): 0.71617,
     (1, 1, 0): 0.53455,
@@ -24,16 +25,18 @@ sample_solutions = {
     (1, 2, 1): 0.90805,
     (1,3,1): 0.94251,
     (1,0,1): 0.74969,
-    # first time it appears is at sample 21441
     (1,5,3): 0.99822
 }
 
 
+# data sizes used for training
 data_sizes = [500 * i for i in range(1, 70)]  # up to 35k samples
-# results to store results from both RF and GB
+
+# store results from both RF and GB for plotting
 results = {sample: {"GB": [], "RF": []} for sample in sample_solutions.keys()}
 
 model_names = ["GB", "RF"]
+
 # load models and make predictions
 for model_name in model_names:
     for size in data_sizes:
@@ -62,7 +65,6 @@ for sample in sample_solutions.keys():
         label=f"Analytical Solution ({sample_solutions[sample]:.5f})",
         linewidth=2
     )
-    # add confidence interval shading for analytical solution
     plt.fill_between(
         data_sizes,
         sample_solutions[sample] - 0.05,
