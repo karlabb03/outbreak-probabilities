@@ -54,7 +54,14 @@ for sample in sample_solutions.keys():
     plt.figure(figsize=(10, 6))
     plt.plot(data_sizes, results[sample]["GB"], label="GB Predictions", color="darkorange", linewidth=3)
     plt.plot(data_sizes, results[sample]["RF"], label="RF Predictions", color="royalblue", linewidth=3)
-    plt.axhline(y=sample_solutions[sample], color="red", linestyle="--", label="Analytical Solution", linewidth=3)
+    #plot analytical solution line with label (exact value)
+    plt.axhline(
+        y=sample_solutions[sample],
+        color="red",
+        linestyle="--",
+        label=f"Analytical Solution ({sample_solutions[sample]:.5f})",
+        linewidth=2
+    )
     # add confidence interval shading for analytical solution
     plt.fill_between(
         data_sizes,
